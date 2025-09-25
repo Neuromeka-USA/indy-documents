@@ -66,5 +66,6 @@ jobs:
       - name: Deploy to gh-pages
         working-directory: docs
         env:
+          GIT_USER: x-access-token:${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run deploy
