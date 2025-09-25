@@ -16,18 +16,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path:  docs/package-lock.json
+          cache-dependency-path: docs/package-lock.json  # ✅ docs 폴더의 lockfile
+
+      # (선택) 경로 확인
+      - name: Show layout
+        run: |
+          pwd
+          ls -la
+          echo "--- docs ---"
+          ls -la docs || true
+
       - name: Install deps
+        working-directory: docs         # ✅ docs에서 실행
         run: npm ci
 
       - name: Build
+        working-directory: docs         # ✅ docs에서 실행
         run: npm run build
 
       - name: Deploy to gh-pages
+        working-directory: docs         # ✅ docs에서 실행
         env:
           GIT_USER: github-actions[bot]
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
