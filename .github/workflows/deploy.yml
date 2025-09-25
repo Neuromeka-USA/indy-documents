@@ -21,9 +21,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: docs/package-lock.json  # ✅ docs 폴더의 lockfile
+          cache-dependency-path: docs/package-lock.json
 
-      # (선택) 경로 확인
+      # Optional: show directory layout for debugging
       - name: Show layout
         run: |
           pwd
@@ -31,17 +31,35 @@ jobs:
           echo "--- docs ---"
           ls -la docs || true
 
-      - name: Install deps
-        working-directory: docs         # ✅ docs에서 실행
+      - name: Install dependencies
+        working-directory: docs
         run: npm ci
 
-      - name: Build
-        working-directory: docs         # ✅ docs에서 실행
-        run: npm run build
-
-      - name: Deploy to gh-pages
-        working-directory: docs         # ✅ docs에서 실행
+      # If gh-pages branch is missing, initialize it once using --skip-build
+      - name: Ensure gh-pages branch exists (init if missing)
+        working-directory: docs
         env:
           GIT_USER: github-actions[bot]
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run deploy
+        run: |
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            echo "GH_PAGES_EXISTS=true" >> $GITHUB_ENV
+            echo "gh-pages branch exists."
+          else
+            echo "GH_PAGES_EXISTS=false" >> $GITHUB_ENV
+            echo "gh-pages branch not found. Initializing with --skip-build..."
+            npm run deploy -- --skip-build
+          fi
+
+      - name: Build
+        working-directory: docs
+        run: npm run build
+
+      - name: Deploy to gh-pages
+        working-directory: docs
+        env:
+          GIT_USER: github-actions[bot]
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # If we just created gh-pages above, now push the real build
+          npm run deploy
