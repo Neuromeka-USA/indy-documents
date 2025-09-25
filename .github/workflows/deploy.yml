@@ -66,6 +66,5 @@ jobs:
       - name: Deploy to gh-pages
         working-directory: docs
         env:
-          GIT_USER: github-actions[bot]
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run deploy
