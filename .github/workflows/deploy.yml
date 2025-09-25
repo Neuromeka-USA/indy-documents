@@ -20,8 +20,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: ./package-lock.json # 실제 경로 확인
-
+          cache-dependency-path:  docs/package-lock.json
       - name: Install deps
         run: npm ci
 
